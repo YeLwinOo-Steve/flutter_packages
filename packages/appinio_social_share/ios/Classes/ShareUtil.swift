@@ -349,24 +349,39 @@ public class ShareUtil{
     
 
 
-    public func shareToInstagramDirect(args : [String: Any?],result: @escaping FlutterResult){
-        if #available(iOS 10, *){
-            let message = args[self.argMessage] as? String
-            let urlString = "instagram://sharesheet?text=\(message!)"
-            if(!canOpenUrl(appName: "instagram")){
-                result(ERROR_APP_NOT_AVAILABLE)
-                return
-            }
-            if let url = URL(string: urlString.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlQueryAllowed)!) {
-                UIApplication.shared.open(url, options: [:], completionHandler: nil)
-                result(SUCCESS)
-            }else{
-                result(ERROR)
-            }
-        }else{
-            result(ERROR_FEATURE_NOT_AVAILABLE_FOR_THIS_VERSON)
+   public func shareToInstagramDirect(args: [String: Any?], result: @escaping FlutterResult) {
+    guard let imagePath = args["imagePath"] as? String else {
+        result(FlutterError(code: "INVALID_ARGUMENTS", message: "Missing imagePath", details: nil))
+        return
+    }
+
+    let message = args["message"] as? String ?? ""
+
+    guard let viewController = UIApplication.shared.keyWindow?.rootViewController else {
+        result(FlutterError(code: "NO_VIEW_CONTROLLER", message: "No root view controller found", details: nil))
+        return
+    }
+
+    let imageUrl = URL(fileURLWithPath: imagePath)
+
+    guard FileManager.default.fileExists(atPath: imageUrl.path) else {
+        result(FlutterError(code: "FILE_NOT_FOUND", message: "Image not found at path", details: nil))
+        return
+    }
+
+    var activityItems: [Any] = [imageUrl]
+    if !message.isEmpty {
+        activityItems.append(message)
+    }
+
+    let activityViewController = UIActivityViewController(activityItems: activityItems, applicationActivities: nil)
+
+    DispatchQueue.main.async {
+        viewController.present(activityViewController, animated: true) {
+            result("SUCCESS")
         }
     }
+}
     
     
     

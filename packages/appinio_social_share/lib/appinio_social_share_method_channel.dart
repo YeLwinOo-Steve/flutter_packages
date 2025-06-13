@@ -202,10 +202,12 @@ class MethodChannelAppinioSocialShare extends AppinioSocialSharePlatform {
   }
 
   @override
-  Future<String> shareToInstagramDirect(String message) async {
-    return ((await methodChannel
-            .invokeMethod<String>(instagramDirect, {"message": message})) ??
-        "");
+  Future<void> shareToInstagramDirect(
+      {required String imagePath, String? message}) async {
+    await _channel.invokeMethod('shareToInstagramDirect', {
+      'imagePath': imagePath,
+      'message': message ?? '',
+    });
   }
 
   @override
