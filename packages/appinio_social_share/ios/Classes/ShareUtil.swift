@@ -6,7 +6,8 @@ import MobileCoreServices
 
 
 
-public class ShareUtil{
+public class ShareUtil: NSObject, UIDocumentInteractionControllerDelegate {
+    private var documentInteractionController: UIDocumentInteractionController?
 
     public let SUCCESS: String = "SUCCESS"
     public let ERROR_APP_NOT_AVAILABLE: String = "ERROR_APP_NOT_AVAILABLE"
@@ -350,7 +351,7 @@ public class ShareUtil{
 
 
    public func shareToInstagramDirect(args: [String: Any?], result: @escaping FlutterResult) {
-        guard let imagePath = args["imagePath"] as? String else {
+                guard let imagePath = args["imagePath"] as? String else {
             result(FlutterError(code: "INVALID_ARGUMENTS", message: "Missing imagePath", details: nil))
             return
         }
@@ -362,13 +363,12 @@ public class ShareUtil{
             return
         }
 
-        let docController = UIDocumentInteractionController(url: imageUrl)
-        docController.uti = "com.instagram.exclusivegram" // Required UTI for Instagram Feed
-        docController.delegate = self
-
         DispatchQueue.main.async {
             if let rootVC = UIApplication.shared.windows.first?.rootViewController {
-                docController.presentOpenInMenu(from: CGRect.zero, in: rootVC.view, animated: true)
+                self.documentInteractionController = UIDocumentInteractionController(url: imageUrl)
+                self.documentInteractionController?.uti = "com.instagram.exclusivegram"
+                self.documentInteractionController?.delegate = self
+                self.documentInteractionController?.presentOpenInMenu(from: CGRect.zero, in: rootVC.view, animated: true)
                 result("SUCCESS")
             } else {
                 result(FlutterError(code: "NO_VIEW_CONTROLLER", message: "No root view controller found", details: nil))
