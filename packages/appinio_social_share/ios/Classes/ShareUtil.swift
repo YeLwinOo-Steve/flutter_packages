@@ -351,7 +351,7 @@ public class ShareUtil: NSObject, UIDocumentInteractionControllerDelegate {
 
 
    public func shareToInstagramDirect(args: [String: Any?], result: @escaping FlutterResult) {
-                guard let imagePath = args["imagePath"] as? String else {
+            guard let imagePath = args["imagePath"] as? String else {
             result(FlutterError(code: "INVALID_ARGUMENTS", message: "Missing imagePath", details: nil))
             return
         }
@@ -364,15 +364,24 @@ public class ShareUtil: NSObject, UIDocumentInteractionControllerDelegate {
         }
 
         DispatchQueue.main.async {
-            if let rootVC = UIApplication.shared.windows.first?.rootViewController {
-                self.documentInteractionController = UIDocumentInteractionController(url: imageUrl)
-                self.documentInteractionController?.uti = "com.instagram.exclusivegram"
-                self.documentInteractionController?.delegate = self
-                self.documentInteractionController?.presentOpenInMenu(from: CGRect.zero, in: rootVC.view, animated: true)
-                result("SUCCESS")
-            } else {
+            guard let rootVC = UIApplication.shared.windows.first?.rootViewController else {
                 result(FlutterError(code: "NO_VIEW_CONTROLLER", message: "No root view controller found", details: nil))
+                return
             }
+
+            self.documentInteractionController = UIDocumentInteractionController(url: imageUrl)
+            self.documentInteractionController?.uti = "com.instagram.exclusivegram"
+            self.documentInteractionController?.delegate = self
+
+            let view = rootVC.view!
+            let rect = CGRect(x: view.bounds.midX, y: view.bounds.midY, width: 0, height: 0)
+
+            if !(self.documentInteractionController?.presentOptionsMenu(from: rect, in: view, animated: true) ?? false) {
+                result(FlutterError(code: "INSTAGRAM_SHARE_FAILED", message: "Instagram sheet could not be presented", details: nil))
+                return
+            }
+
+            result("SUCCESS")
         }
     }
     
