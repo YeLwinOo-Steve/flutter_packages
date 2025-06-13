@@ -72,8 +72,8 @@ public class SocialShareUtil {
     }
 
 
-    public String shareToInstagramDirect(String text, Context activity) {
-        return shareTextToPackage(text, activity, INSTAGRAM_PACKAGE);
+    public String shareToInstagramDirect(String imagePath, String message, Context activity) {
+        return shareFileAndTextToPackage(imagePath, message, activity, INSTAGRAM_PACKAGE);
     }
 
     public String shareToInstagramFeed(String imagePath, String message, Context activity, String text) {

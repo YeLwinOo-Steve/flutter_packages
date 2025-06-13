@@ -18,8 +18,11 @@ class IOS {
         .shareToTwitter(message, filePath);
   }
 
-  Future<String> shareToInstagramDirect(String message) {
-    return AppinioSocialSharePlatform.instance.shareToInstagramDirect(message);
+  Future<void> shareToInstagramDirect(String imagePath, {String? message}) {
+    return AppinioSocialSharePlatform.instance.shareToInstagramDirect(
+      imagePath: imagePath,
+      message: message,
+    );
   }
 
   Future<String> shareToInstagramFeed(String imagePath) {
