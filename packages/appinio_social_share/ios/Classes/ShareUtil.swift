@@ -348,36 +348,33 @@ public class ShareUtil{
     }
     
 
-public func shareToInstagramFeed(args: [String: Any?], result: @escaping FlutterResult) {
-    guard let imagePath = args["imagePath"] as? String else {
-        result(FlutterError(code: "INVALID_ARGUMENTS", message: "Missing imagePath", details: nil))
-        return
-    }
 
-    let imageUrl = URL(fileURLWithPath: imagePath)
+   public func shareToInstagramDirect(args: [String: Any?], result: @escaping FlutterResult) {
+        guard let imagePath = args["imagePath"] as? String else {
+            result(FlutterError(code: "INVALID_ARGUMENTS", message: "Missing imagePath", details: nil))
+            return
+        }
 
-    guard FileManager.default.fileExists(atPath: imageUrl.path) else {
-        result(FlutterError(code: "FILE_NOT_FOUND", message: "Image not found at path", details: nil))
-        return
-    }
+        let imageUrl = URL(fileURLWithPath: imagePath)
 
-    if UIApplication.shared.canOpenURL(URL(string: "instagram://app")!) {
+        guard FileManager.default.fileExists(atPath: imageUrl.path) else {
+            result(FlutterError(code: "FILE_NOT_FOUND", message: "Image not found at path", details: nil))
+            return
+        }
+
         let docController = UIDocumentInteractionController(url: imageUrl)
-        docController.uti = "com.instagram.exclusivegram" // required for Instagram
-        docController.annotation = ["InstagramCaption": "Shared via my app"]
-        
+        docController.uti = "com.instagram.exclusivegram" // Required UTI for Instagram Feed
+        docController.delegate = self
+
         DispatchQueue.main.async {
-            if let vc = UIApplication.shared.keyWindow?.rootViewController {
-                docController.presentOpenInMenu(from: vc.view.frame, in: vc.view, animated: true)
+            if let rootVC = UIApplication.shared.windows.first?.rootViewController {
+                docController.presentOpenInMenu(from: CGRect.zero, in: rootVC.view, animated: true)
                 result("SUCCESS")
             } else {
-                result(FlutterError(code: "NO_VIEW_CONTROLLER", message: "No root view controller", details: nil))
+                result(FlutterError(code: "NO_VIEW_CONTROLLER", message: "No root view controller found", details: nil))
             }
         }
-    } else {
-        result(FlutterError(code: "INSTAGRAM_NOT_INSTALLED", message: "Instagram app is not installed", details: nil))
     }
-} 
     
     public func shareToMessenger(args : [String: Any?],result: @escaping FlutterResult){
         if #available(iOS 10, *){
