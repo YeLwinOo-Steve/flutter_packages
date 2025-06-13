@@ -348,17 +348,9 @@ public class ShareUtil{
     }
     
 
-
-   public func shareToInstagramDirect(args: [String: Any?], result: @escaping FlutterResult) {
+public func shareToInstagramFeed(args: [String: Any?], result: @escaping FlutterResult) {
     guard let imagePath = args["imagePath"] as? String else {
         result(FlutterError(code: "INVALID_ARGUMENTS", message: "Missing imagePath", details: nil))
-        return
-    }
-
-    let message = args["message"] as? String ?? ""
-
-    guard let viewController = UIApplication.shared.keyWindow?.rootViewController else {
-        result(FlutterError(code: "NO_VIEW_CONTROLLER", message: "No root view controller found", details: nil))
         return
     }
 
@@ -369,22 +361,23 @@ public class ShareUtil{
         return
     }
 
-    var activityItems: [Any] = [imageUrl]
-    if !message.isEmpty {
-        activityItems.append(message)
-    }
-
-    let activityViewController = UIActivityViewController(activityItems: activityItems, applicationActivities: nil)
-
-    DispatchQueue.main.async {
-        viewController.present(activityViewController, animated: true) {
-            result("SUCCESS")
+    if UIApplication.shared.canOpenURL(URL(string: "instagram://app")!) {
+        let docController = UIDocumentInteractionController(url: imageUrl)
+        docController.uti = "com.instagram.exclusivegram" // required for Instagram
+        docController.annotation = ["InstagramCaption": "Shared via my app"]
+        
+        DispatchQueue.main.async {
+            if let vc = UIApplication.shared.keyWindow?.rootViewController {
+                docController.presentOpenInMenu(from: vc.view.frame, in: vc.view, animated: true)
+                result("SUCCESS")
+            } else {
+                result(FlutterError(code: "NO_VIEW_CONTROLLER", message: "No root view controller", details: nil))
+            }
         }
+    } else {
+        result(FlutterError(code: "INSTAGRAM_NOT_INSTALLED", message: "Instagram app is not installed", details: nil))
     }
-}
-    
-    
-    
+} 
     
     public func shareToMessenger(args : [String: Any?],result: @escaping FlutterResult){
         if #available(iOS 10, *){
