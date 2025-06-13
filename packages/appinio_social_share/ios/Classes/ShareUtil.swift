@@ -580,22 +580,21 @@ public class ShareUtil: NSObject, UIDocumentInteractionControllerDelegate {
             if let whatsappURL = URL(string: urlString) {
 
                 if UIApplication.shared.canOpenURL(whatsappURL as URL) {
-                    // Convert to JPEG (or PNG if you really must)
-                    guard let imageData = image.jpegData(compressionQuality: 0.9) else {
-                        result(FlutterError(code: "ENCODING_FAILED", message: "Could not encode image", details: nil))
-                        return
-                    }
-                    let tempFile = FileManager.default.temporaryDirectory.appendingPathComponent("whatsAppTmp.jpg")
-                    do {
-                        try imageData.write(to: tempFile, options: .atomic)
-                        let documentInteractionController = UIDocumentInteractionController(url: tempFile)
-                        documentInteractionController.uti = "net.whatsapp.image"
-                        documentInteractionController.presentOpenInMenu(from: CGRect.zero, in: UIApplication.topViewController()!.view, animated: true)
 
-                    } catch {
-                        print(error)
-                        result(FlutterError(code: "WRITE_FAILED", message: "Could not write image to disk", details: error.localizedDescription))
-                    }
+                        if let imageData = image.jpegData(compressionQuality: 1.0) {
+                            let tempFile = URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent("Documents/whatsAppTmp.jpg")
+                            do {
+                                try imageData.write(to: tempFile, options: .atomic)
+                                let documentInteractionController = UIDocumentInteractionController(url: tempFile)
+                                documentInteractionController.uti = "net.whatsapp.image"
+                                documentInteractionController.presentOpenInMenu(from: CGRect.zero, in: UIApplication.topViewController()!.view, animated: true)
+
+                            } catch {
+                                print(error)
+                            }
+                        }
+                    
+
                 } else {
                    print("Cannot open whatsapp")
                 }
