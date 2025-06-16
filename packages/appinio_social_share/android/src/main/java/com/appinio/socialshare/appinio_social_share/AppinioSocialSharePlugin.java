@@ -92,7 +92,7 @@ public class AppinioSocialSharePlugin implements FlutterPlugin, MethodCallHandle
                 result.success(response);
                 return null;
             case INSTAGRAM_DIRECT:
-                return socialShareUtil.shareToInstagramDirect(message, activeContext);
+                return socialShareUtil.shareToInstagramDirect(imagePath,message, activeContext);
             case INSTAGRAM_FEED:
                 return socialShareUtil.shareToInstagramFeed(imagePath, message, activeContext, message);
             case INSTAGRAM_FEED_FILES:
